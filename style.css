@@ -1,0 +1,63 @@
+body {
+    text-align: center; /* Center all text */
+    font-family: Arial, sans-serif; /* Set a default font */
+    margin: 0; /* Remove default margin */
+    padding: 20px; /* Add some padding */
+    background-color: #f0f0f0; /* Set background color to light gray */
+}
+
+h1 {
+    font-size: 48px; /* Large font size for title */
+    margin: 10px 0; /* Adjust margin for spacing */
+}
+
+h2 {
+    font-size: 20px; /* Smaller font size for subtitle */
+    font-style: italic; /* Italic style for subtitle */
+    margin: 5px 0; /* Reduce margin for spacing */
+}
+
+.try-effects {
+    font-size: 24px; /* Font size for the try effects label */
+    margin: 20px 0; /* Margin for spacing */
+}
+
+.control-wrapper {
+    width: 80%; /* Set a specific width for control wrappers */
+    margin: 0 auto; /* Center the control wrappers */
+    margin-bottom: 20px; /* Space between controls */
+}
+
+.control-label {
+    display: block; /* Make labels block elements */
+    margin-top: 5px; /* Margin for spacing */
+}
+
+.drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+
+.drop-area.hover {
+    border-color: #333;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}

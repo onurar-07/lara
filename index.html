@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LARA - Learning by Trying</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <div class="container"> 
+        <h1>LARA</h1> <!-- Title -->
+        
+        <!-- Try Effects Section -->
+        <p class="try-effects">Trying Effects</p> <!-- Label for effects section -->
+        
+        <!-- Audio Player -->
+        <div class="control-wrapper">
+            <audio id="audio" controls>
+                <source src="lara_deneme.wav" type="audio/wav">
+                The original sound
+            </audio> 
+            <span class="control-label">Audio Player</span>
+        </div>
+        
+        <!-- Panning Control (Left to Right) -->
+        <div class="control-wrapper">
+            <input type="range" id="pan-slider" class="panning-control" min="-1" max="1" step="0.1" value="0">
+            <span class="control-label">Pan: Left (-1) | Right (+1)</span>
+        </div>
+
+        <!-- Delay Control (Feedback) -->
+        <div class="control-wrapper">
+            <input type="range" id="delay-slider" class="delay-control" min="0" max="1" step="0.1" value="0.5">
+            <span class="control-label">Delay Feedback: 0 | 1</span>
+        </div>
+
+        <!-- Distortion Control -->
+        <div class="control-wrapper">
+            <input type="range" id="distortion-slider" class="distortion-control" min="0" max="100" step="1" value="0">
+            <span class="control-label">Distortion: 0 | 100</span>
+        </div>
+
+        <!-- Drag and Drop Area -->
+        <div class="drop-area" id="drop-area">
+            <p>Try it yourself! Drag and drop your .wav file here</p>
+        </div>
+
+        <!-- Back to Original Button -->
+        <button id="reset-button" class="button">Back to Original File</button>
+    </div>
+
+    <script>
+        // Create an AudioContext to manipulate audio
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const audioElement = document.getElementById('audio');
+        const track = audioContext.createMediaElementSource(audioElement);
+
+        // Create stereo panner
+        const panner = audioContext.createStereoPanner();
+
+        // Create delay node
+        const delay = audioContext.createDelay();
+        delay.delayTime.value = 0.5; // Initial delay time (in seconds)
+
+        // Create gain node for feedback control
+        const feedback = audioContext.createGain();
+        feedback.gain.value = 0.5; // Initial feedback level
+
+        // Create distortion node
+        const distortion = audioContext.createWaveShaper();
+        distortion.curve = makeDistortionCurve(0); // Initial distortion value
+        distortion.oversample = '4x'; // High-quality distortion
+
+        // Connect audio source -> panner -> delay -> feedback -> distortion -> destination
+        track.connect(panner).connect(delay);
+        delay.connect(feedback);
+        feedback.connect(delay); // Create feedback loop
+        feedback.connect(distortion); // Connect feedback to distortion
+        distortion.connect(audioContext.destination); // Connect distortion output to destination
+        track.connect(audioContext.destination); // Connect track directly to destination for original sound
+
+        // Function to create a distortion curve
+        function makeDistortionCurve(amount) {
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            const deg = Math.PI / 180;
+            for (let i = 0; i < n_samples; ++i) {
+                const x = (i * 2) / n_samples - 1; // Scale x to (-1, 1)
+                curve[i] = (1 + amount) * x - amount * Math.abs(x);
+            }
+            return curve;
+        }
+
+        // Handle slider input to adjust panning
+        const panSlider = document.getElementById('pan-slider');
+        panSlider.addEventListener('input', function() {
+            panner.pan.value = this.value;
+        });
+
+        // Handle delay feedback control
+        const delaySlider = document.getElementById('delay-slider');
+        delaySlider.addEventListener('input', function() {
+            feedback.gain.value = this.value; // Adjust feedback level
+        });
+
+        // Handle distortion control
+        const distortionSlider = document.getElementById('distortion-slider');
+        distortionSlider.addEventListener('input', function() {
+            const value = this.value; // Get the current distortion value
+            distortion.curve = makeDistortionCurve(value / 100); // Adjust distortion level (scale to 0-1)
+            console.log("Distortion Level: ", value); // Log current distortion level
+        });
+
+        // Drag and Drop functionality
+        const dropArea = document.getElementById('drop-area');
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault(); // Prevent default behavior
+            dropArea.classList.add('hover'); // Add hover effect
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('hover'); // Remove hover effect
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault(); // Prevent default behavior
+            dropArea.classList.remove('hover'); // Remove hover effect
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type === 'audio/wav') {
+                    const url = URL.createObjectURL(file);
+                    audioElement.src = url; // Update audio source
+                    audioElement.load(); // Load the new audio file
+                } else {
+                    alert('Please drop a .wav file');
+                }
+            }
+        });
+
+        // Reset button functionality
+        const resetButton = document.getElementById('reset-button');
+        resetButton.addEventListener('click', () => {
+            audioElement.src = "lara_deneme.wav"; // Reset to original file
+            audioElement.load(); // Load the original file
+        });
+
+        // Play audio when user interacts (for browsers that block autoplay)
+        audioElement.onplay = () => {
+            audioContext.resume();
+        };
+    </script>
+</body>
+</html>
